@@ -33,7 +33,7 @@ def generate_embeddings(text):
         input=text,
         model="text-embedding-ada-002"
     )
-    # Correctly access the embedding data
+    # Correctly access the embedding using dot notation
     return response.data[0].embedding
 
 for i, text in enumerate(texts):
@@ -45,17 +45,15 @@ for i, text in enumerate(texts):
 def search_relevant_text(query):
     query_embedding = np.array([generate_embeddings(query)]).astype('float32')
     distances, indices = index.search(query_embedding, k=1)
-    relevant_text = text_map[indices[0][0]]
-    source_document = FILES[indices[0][0]]  # Match the document filename
-    return relevant_text, source_document
+    return text_map[indices[0][0]]
 
 # Generate chatbot response based on relevant text
 def generate_response(user_input):
     try:
-        relevant_text, _ = search_relevant_text(user_input)
+        relevant_text = search_relevant_text(user_input)
         prompt = f"Use the following document text to answer the question:\n\n{relevant_text}\n\nQuestion: {user_input}"
         completion = client.chat.completions.create(
-            model="gpt-4",
+            model="gpt-4o-mini",
             messages=[
                 {"role": "system", "content": "You are a helpful assistant."},
                 {"role": "user", "content": prompt}

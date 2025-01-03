@@ -1,3 +1,13 @@
+const chatForm = document.getElementById('chat-form');
+const chatBox = document.getElementById('chat-box');
+const userInput = document.getElementById('user-input');
+
+// Add default welcome message on page load
+window.onload = () => {
+    chatBox.innerHTML += `<div class="ai-message">Hi, I can answer any questions you may have about our policies.</div><br>`;
+};
+
+// Handle form submission
 chatForm.addEventListener('submit', async (e) => {
     e.preventDefault(); // Prevent form from reloading the page
 
@@ -16,13 +26,7 @@ chatForm.addEventListener('submit', async (e) => {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ message })
         });
-
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-        }
-
         const data = await response.json();
-        console.log("Response received:", data); // Debug response
 
         // Replace "AI is typing..." with the actual response and include reference
         chatBox.innerHTML = chatBox.innerHTML.replace('<div class="ai-message">AI is typing...</div>', '');

@@ -31,12 +31,14 @@ body {
     color: blue;
 }
 
+
 .ai-message {
     text-align: left;
     color: green;
-    font-weight: bold; /* Makes the AI response bold */
-    margin-bottom: 10px; /* Adds spacing after the AI response */
+    font-weight: bold;
+    margin-bottom: 10px;
 }
+
 
 .error-message {
     text-align: center;
