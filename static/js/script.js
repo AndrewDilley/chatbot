@@ -1,33 +1,38 @@
-const chatForm = document.getElementById('chat-form');
-const chatBox = document.getElementById('chat-box');
-const userInput = document.getElementById('user-input');
-
 chatForm.addEventListener('submit', async (e) => {
-    e.preventDefault();
+    e.preventDefault(); // Prevent form from reloading the page
 
-    const userMessage = userInput.value.trim();
-    if (!userMessage) return;
+    const message = userInput.value.trim();
+    if (!message) return; // Ignore empty messages
 
     // Display user message
-    displayMessage('user', userMessage);
-    userInput.value = '';
+    chatBox.innerHTML += `<div class="user-message">${message}</div>`;
+    userInput.value = ''; // Clear the input field
 
-    // Send message to Flask server
-    const response = await fetch('/chat', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ message: userMessage }),
-    });
-    const data = await response.json();
+    // Display AI response
+    chatBox.innerHTML += `<div class="ai-message">AI is typing...</div>`;
+    try {
+        const response = await fetch('/chat', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ message })
+        });
 
-    // Display bot response
-    displayMessage('bot', data.response);
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const data = await response.json();
+        console.log("Response received:", data); // Debug response
+
+        // Replace "AI is typing..." with the actual response and include reference
+        chatBox.innerHTML = chatBox.innerHTML.replace('<div class="ai-message">AI is typing...</div>', '');
+        chatBox.innerHTML += `<div class="ai-message">${data.response}</div><br>`;
+    } catch (error) {
+        console.error("Error fetching response:", error); // Debug errors
+        chatBox.innerHTML = chatBox.innerHTML.replace('<div class="ai-message">AI is typing...</div>', '');
+        chatBox.innerHTML += `<div class="error-message">Error: Unable to fetch AI response.</div>`;
+    }
+
+    // Auto-scroll to the latest message
+    chatBox.scrollTop = chatBox.scrollHeight;
 });
-
-function displayMessage(sender, message) {
-    const messageDiv = document.createElement('div');
-    messageDiv.classList.add(sender);
-    messageDiv.textContent = message;
-    chatBox.appendChild(messageDiv);
-    chatBox.scrollTop = chatBox.scrollHeight; // Scroll to the bottom
-}
