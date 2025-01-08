@@ -24,5 +24,6 @@ RUN pip install gunicorn
 # Expose the port the app will run on
 EXPOSE 5000
 
-# Use Gunicorn to run the Flask app in production mode
-CMD ["gunicorn", "--bind", "0.0.0.0:5000", "app:app"]
+# Use Gunicorn in production, fall back to Flask for local development
+CMD ["sh", "-c", "if [ \"$DOCKER_ENV\" = \"true\" ]; then gunicorn --bind 0.0.0.0:5000 app:app; else python app.py; fi"]
+

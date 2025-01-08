@@ -33,7 +33,7 @@ httpx==0.28.1
 httpx-sse==0.4.0
 idna==3.10
 ipykernel==6.29.5
-ipython==8.31.0
+ipython==8.18.1
 isoduration==20.11.0
 jedi==0.19.2
 Jinja2==3.1.5
@@ -75,7 +75,7 @@ nbformat==5.10.4
 nest-asyncio==1.6.0
 notebook==7.3.2
 notebook_shim==0.2.4
-numpy==2.2.1
+numpy==2.0.2
 Office365-REST-Python-Client==2.5.14
 openai==1.58.1
 orjson==3.10.13
@@ -134,6 +134,3 @@ webcolors==24.11.1
 webencodings==0.5.1
 websocket-client==1.8.0
 yarl==1.18.3
-
-ChatGPT said:
-ChatGPT
