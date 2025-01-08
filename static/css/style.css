@@ -45,6 +45,24 @@ body {
     color: red;
 }
 
+.reference {
+    text-align: left;
+    color: #555; /* Dark gray for reference text */
+    font-style: italic; /* Italicized for distinction */
+    margin-top: 5px;
+    font-size: 0.9em; /* Slightly smaller font */
+}
+
+.reference .reference-label {
+    color: blue;
+    font-weight: bold;
+}
+
+.reference .reference-text {
+    color: green;
+}
+
+
 #chat-form {
     display: flex;
     padding: 10px;
