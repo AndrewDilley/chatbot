@@ -69,7 +69,7 @@ nbconvert==7.16.4
 nbformat==5.10.4
 nest-asyncio==1.6.0
 notebook_shim==0.2.4
-numpy==2.0.2
+numpy==1.24.3
 Office365-REST-Python-Client==2.5.14
 openai==1.58.1
 orjson==3.10.13
