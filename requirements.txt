@@ -32,8 +32,6 @@ httpcore==1.0.7
 httpx==0.28.1
 httpx-sse==0.4.0
 idna==3.10
-ipykernel==6.29.5
-ipython==8.18.1
 isoduration==20.11.0
 jedi==0.19.2
 Jinja2==3.1.5
@@ -45,11 +43,9 @@ jsonschema==4.23.0
 jsonschema-specifications==2024.10.1
 jupyter-events==0.11.0
 jupyter-lsp==2.2.5
-jupyter_client==8.6.3
 jupyter_core==5.7.2
 jupyter_server==2.15.0
 jupyter_server_terminals==0.5.3
-jupyterlab==4.3.4
 jupyterlab_pygments==0.3.0
 jupyterlab_server==2.27.3
 langchain==0.3.13
@@ -64,7 +60,6 @@ langgraph-sdk==0.1.48
 langsmith==0.2.6
 MarkupSafe==3.0.2
 marshmallow==3.23.2
-matplotlib-inline==0.1.7
 mistune==3.1.0
 msgpack==1.1.0
 multidict==6.1.0
@@ -73,7 +68,6 @@ nbclient==0.10.2
 nbconvert==7.16.4
 nbformat==5.10.4
 nest-asyncio==1.6.0
-notebook==7.3.2
 notebook_shim==0.2.4
 numpy==2.0.2
 Office365-REST-Python-Client==2.5.14
@@ -98,8 +92,6 @@ pypdf==5.1.0
 python-dateutil==2.9.0.post0
 python-dotenv==1.0.1
 python-json-logger==3.2.1
-pywin32==308
-pywinpty==2.0.14
 PyYAML==6.0.2
 pyzmq==26.2.0
 referencing==0.35.1
