@@ -1,5 +1,5 @@
 """
-app.py (chatbot9)
+app.py (chatbot10)
 
 Description:
 ------------
@@ -61,27 +61,32 @@ client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 if os.getenv("DOCKER_ENV") == "true":
     DOCUMENTS_PATH = "/app/documents"  # Path inside Docker
 else:
-    DOCUMENTS_PATH = "C:/Users/andrew.dilley/development/chatbot9/documents"  # Path for local development
+    DOCUMENTS_PATH = "C:/Users/andrew.dilley/development/chatbot10/documents"  # Path for local development
 
+SHAREPOINT_LINKS = {
+    "Alcohol and Drugs in the Workplace Procedure.DOCX": "https://wannonwater.sharepoint.com/sites/cdms/SitePages/Homepage.aspx#/PublishedDocumentView/508",
+    "Consequence Of Employee Misconduct.DOCX": "https://wannonwater.sharepoint.com/sites/cdms/SitePages/Homepage.aspx#/PublishedDocumentView/286",
+    "Contractor Management Procedure.DOCX": "https://wannonwater.sharepoint.com/sites/cdms/SitePages/Homepage.aspx#/PublishedDocumentView/417",
+    "Cyber Security Incident Response Plan Framework.DOCX": "https://wannonwater.sharepoint.com/sites/cdms/SitePages/Homepage.aspx#/PublishedDocumentView/885",
+    "Flexible Working Arrangements Procedure.DOCX": "https://wannonwater.sharepoint.com/sites/cdms/SitePages/Homepage.aspx#/PublishedDocumentView/640",
+    "Gifts Benefits and Hospitality Policy - BOARD.DOCX": "https://wannonwater.sharepoint.com/sites/cdms/SitePages/Homepage.aspx#/PublishedDocumentView/822",
+    "Hazard Reporting Procedure.DOCX": "https://wannonwater.sharepoint.com/sites/cdms/SitePages/Homepage.aspx#/PublishedDocumentView/293",
+    "Incident Reporting and Response Procedure.DOCX": "https://wannonwater.sharepoint.com/sites/cdms/SitePages/Homepage.aspx#/PublishedDocumentView/665",
+    "Information Technology Security Procedure.DOCX": "https://wannonwater.sharepoint.com/sites/cdms/SitePages/Homepage.aspx#/PublishedDocumentView/815",
+    "Mobile Phone Procedure.DOCX": "https://wannonwater.sharepoint.com/sites/cdms/SitePages/Homepage.aspx#/PublishedDocumentView/896",
+    "Motor Vehicle Operational Procedure.DOCX": "https://wannonwater.sharepoint.com/sites/cdms/SitePages/Homepage.aspx#/PublishedDocumentView/240",
+    "Personal Protective Equipment and Field Uniform.DOCX": "https://wannonwater.sharepoint.com/sites/cdms/SitePages/Homepage.aspx#/PublishedDocumentView/230",
+    "Vehicle Logbook Procedure.DOCX": "https://wannonwater.sharepoint.com/sites/cdms/SitePages/Homepage.aspx#/PublishedDocumentView/1321",
+    "Physical Security Policy.docx": "https://wannonwater.sharepoint.com/sites/cdms/SitePages/Homepage.aspx#/PublishedDocumentView/1355",
+    "Use of text based Generative Artificial Intelligence (AI).DOCX": "https://wannonwater.sharepoint.com/sites/cdms/SitePages/Homepage.aspx#/PublishedDocumentView/1373",
+    "Vehicle Safety System Alarm Procedure.DOCX": "https://wannonwater.sharepoint.com/sites/cdms/SitePages/Homepage.aspx#/PublishedDocumentView/883",
+    "Vehicle Safety System Manual.DOCX": "https://wannonwater.sharepoint.com/sites/cdms/SitePages/Homepage.aspx#/PublishedDocumentView/1317",
+    "Zero Harm Policy.DOCX": "https://wannonwater.sharepoint.com/sites/cdms/SitePages/Homepage.aspx#/PublishedDocumentView/722"
 
-FILES = ['Alcohol and Drugs in the Workplace Procedure.DOCX', 
-         'Consequence Of Employee Misconduct.DOCX', 
-         'Contractor Management Procedure.DOCX', 
-         'Cyber Security Incident Response Plan Framework.DOCX', 
-         'Flexible Working Arrangements Procedure.DOCX', 
-         'Gifts Benefits and Hospitality Policy - BOARD.DOCX', 
-         'Hazard Reporting Procedure.DOCX', 
-         'Incident Reporting and Response Procedure.DOCX', 
-         'Information Technology Security Procedure.DOCX', 
-         'Mobile Phone Procedure.DOCX', 
-         'Motor Vehicle Operational Procedure.DOCX', 
-         'Personal Protective Equipment and Field Uniform.DOCX', 
-         'Physical Security Policy.docx', 
-         'Use of text based Generative Artificial Intelligence (AI).DOCX', 
-         'Vehicle Logbook Procedure.DOCX', 
-         'Vehicle Safety System Alarm Procedure.DOCX', 
-         'Vehicle Safety System Manual.DOCX', 
-         'Zero Harm Policy.DOCX']
+    # Add other file names and links here
+}
+
+FILES = list(SHAREPOINT_LINKS.keys())
 
 # Initialize FAISS index and text map
 dimension = 1536  # Dimensionality of OpenAI's text-embedding-ada-002
@@ -135,12 +140,11 @@ def search_relevant_text(query):
 
 def generate_response(user_input):
     try:
-        # Retrieve relevant document text and file name
         relevant_text, file_name = search_relevant_text(user_input)
 
         # Build the prompt
         prompt = f"Use the following document text to answer the question:\n\n{relevant_text}\n\nQuestion: {user_input}"
-        
+
         # Generate a response from OpenAI
         completion = client.chat.completions.create(
             model="gpt-4o-mini",
@@ -151,11 +155,12 @@ def generate_response(user_input):
         )
         answer = completion.choices[0].message.content
 
-        # Format the response with Reference on a new line and styled
+        # Add hyperlink to the reference
+        sharepoint_link = SHAREPOINT_LINKS.get(file_name, "#")
         formatted_answer = (
             f"{answer}<br><br>"
             f"<span style='color:purple; font-weight:bold;'>Reference:</span> "
-            f"<span style='color:purple;'>{file_name}</span>"
+            f"<a href='{sharepoint_link}' target='_blank'>{file_name}</a>"
         )
         return formatted_answer
     except Exception as e:
