@@ -1,5 +1,5 @@
 """
-app.py (chatbot8)
+app.py (chatbot9)
 
 Description:
 ------------
@@ -19,6 +19,7 @@ Key Features:
 
 Recent Changes:
 ---------------
+1. Use of WW procedures and policies documents.
 
 Setup:
 ------
@@ -40,9 +41,6 @@ Andrew Dilley
 
 """
 
-
-
-
 from flask import Flask, request, jsonify, render_template
 from openai import OpenAI
 from docx import Document
@@ -58,19 +56,32 @@ load_dotenv()
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
 # Path to documents
-# DOCUMENTS_PATH = "C:\\Users\\andrew.dilley\\development\\chatbot8\\documents"
-# DOCUMENTS_PATH = "C:/Users/andrew.dilley/development/chatbot8/documents"
-# DOCUMENTS_PATH = "/app/documents"
-
-
 # Use a default path for local development, and override it if running in Docker
+
 if os.getenv("DOCKER_ENV") == "true":
     DOCUMENTS_PATH = "/app/documents"  # Path inside Docker
 else:
-    DOCUMENTS_PATH = "C:/Users/andrew.dilley/development/chatbot8/documents"  # Path for local development
+    DOCUMENTS_PATH = "C:/Users/andrew.dilley/development/chatbot9/documents"  # Path for local development
 
 
-FILES = ["Acceptable.docx", "ai.docx", "Consequences.docx", "data.docx", "Drugs.docx", "Gifts.docx", "Mobile.docx",  "Remote.docx", "security.docx", "Vehicle.docx"]
+FILES = ['Alcohol and Drugs in the Workplace Procedure.DOCX', 
+         'Consequence Of Employee Misconduct.DOCX', 
+         'Contractor Management Procedure.DOCX', 
+         'Cyber Security Incident Response Plan Framework.DOCX', 
+         'Flexible Working Arrangements Procedure.DOCX', 
+         'Gifts Benefits and Hospitality Policy - BOARD.DOCX', 
+         'Hazard Reporting Procedure.DOCX', 
+         'Incident Reporting and Response Procedure.DOCX', 
+         'Information Technology Security Procedure.DOCX', 
+         'Mobile Phone Procedure.DOCX', 
+         'Motor Vehicle Operational Procedure.DOCX', 
+         'Personal Protective Equipment and Field Uniform.DOCX', 
+         'Physical Security Policy.docx', 
+         'Use of text based Generative Artificial Intelligence (AI).DOCX', 
+         'Vehicle Logbook Procedure.DOCX', 
+         'Vehicle Safety System Alarm Procedure.DOCX', 
+         'Vehicle Safety System Manual.DOCX', 
+         'Zero Harm Policy.DOCX']
 
 # Initialize FAISS index and text map
 dimension = 1536  # Dimensionality of OpenAI's text-embedding-ada-002
@@ -121,25 +132,6 @@ def search_relevant_text(query):
 
 
 # Generate chatbot response based on relevant text
-
-
-# def generate_response(user_input):
-#     try:
-#         relevant_text, file_name = search_relevant_text(user_input)
-#         prompt = f"Use the following document text to answer the question:\n\n{relevant_text}\n\nQuestion: {user_input}"
-
-#         completion = client.chat.completions.create(
-#             model="gpt-4o-mini",
-#             messages=[
-#                 {"role": "system", "content": "You are a helpful assistant."},
-#                 {"role": "user", "content": prompt}
-#             ]
-#         )
-#         answer = completion.choices[0].message.content
-#         # Add policy name reference to the response
-#         return f"{answer}\n\nReference: {file_name}"
-#     except Exception as e:
-#         return f"Error: {str(e)}"
 
 def generate_response(user_input):
     try:
