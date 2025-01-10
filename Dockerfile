@@ -10,6 +10,8 @@ WORKDIR /app
 # Copy and install dependencies first (optimized for Docker caching)
 COPY requirements.txt ./
 RUN pip install --no-cache-dir -r requirements.txt
+RUN pip install PyPDF2
+
 
 # Copy the rest of the application code
 COPY . . 
