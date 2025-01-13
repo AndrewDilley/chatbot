@@ -83,6 +83,12 @@ def generate_response(user_input):
         if user_input.lower() in generic_responses:
             return "Hello! How can I assist you today?"
 
+
+        # Detect polite or non-document-related queries
+        polite_responses = {"thanks", "thank you", "bye", "goodbye"}
+        if user_input.lower().strip("!.") in polite_responses:
+            return "You're welcome! Let me know if you need anything else!"
+
         relevant_text, file_name = search_relevant_text(user_input)
         
         print(f"DEBUG: Matched file_name: {file_name}")
@@ -111,12 +117,15 @@ def generate_response(user_input):
         )
         answer = completion.choices[0].message.content
 
+        # Format response into readable sections
+        formatted_answer = format_response(answer)
+
         # Add document reference only if relevant
         sharepoint_link = SHAREPOINT_LINKS.get(file_name, "#")
         if file_name and file_name != "N/A":
             formatted_answer = (
                 f"{answer}<br><br>"
-                f"<span style='color:purple; font-weight:bold;'>Reference:</span> "
+                f"<span style='color:purple; font-weight:normal;'>Reference:</span> "
                 f"<a href='{sharepoint_link}' target='_blank'>{file_name}</a>"
             )
             return formatted_answer
@@ -126,6 +135,95 @@ def generate_response(user_input):
     except Exception as e:
         return f"Error: {str(e)}"
 
+
+def generate_response(user_input):
+    try:
+        # Predefined polite responses
+        generic_responses = {"hi", "hello", "hey", "greetings"}
+        polite_responses = {"thanks", "thank you", "bye", "goodbye"}
+
+        if user_input.lower() in generic_responses:
+            return "Hello! How can I assist you today?"
+        elif user_input.lower().strip("!.") in polite_responses:
+            return "You're welcome! Let me know if you need anything else!"
+
+        # Get relevant text and file reference
+        relevant_text, file_name = search_relevant_text(user_input)
+
+        if file_name == "N/A":
+            prompt = f"You are a helpful assistant. Please answer this question directly:\n\nQuestion: {user_input}"
+        else:
+            prompt = f"Use the following document text to answer the question:\n\n{relevant_text}\n\nQuestion: {user_input}"
+
+        completion = client.chat.completions.create(
+            model="gpt-4o-mini",
+            messages=[
+                {"role": "system", "content": "You are a helpful assistant."},
+                {"role": "user", "content": prompt}
+            ]
+        )
+        answer = completion.choices[0].message.content
+
+        # raw_answer = answer if answer else "No answer found"
+        # print(f"DEBUG: Raw Answer: {raw_answer}")
+
+        # Format response into readable sections
+        formatted_answer = format_response(answer)
+
+        # Add document reference if applicable
+        if file_name != "N/A":
+            sharepoint_link = SHAREPOINT_LINKS.get(file_name, "#")
+            formatted_answer += (
+                f"<br><br><span style='color:purple; font-weight:normal;'>Reference:</span> "
+                f"<a href='{sharepoint_link}' target='_blank'>{file_name}</a>"
+            )
+
+        return formatted_answer
+
+    except Exception as e:
+        return f"Error: {str(e)}"
+
+
+import re
+
+def format_response(raw_text):
+    """
+    Format the raw text into clean HTML:
+    1. Convert headings like "### Text" to <h2>.
+    2. Convert bullet points (- ...) into <ul><li>.
+    3. Convert numbered points (1. **Text**) into <ol><li>.
+    4. Remove all instances of ** from the text.
+    """
+    formatted_text = ""
+    lines = raw_text.split("\n")  # Split text by lines
+
+    for line in lines:
+        line = line.strip()  # Remove leading/trailing whitespace
+
+        # Skip empty lines
+        if not line:
+            continue
+
+        # Remove all instances of **
+        line = re.sub(r"\*\*", "", line)  # Remove all ** from the text
+
+        # Convert headings (###)
+        if line.startswith("### "):
+            formatted_text += f"<h3>{line[4:].strip()}</h3>\n"
+
+        # Convert bullet points (- ...)
+        elif line.startswith("- "):
+            formatted_text += f"<ul><li>{line[2:].strip()}</li></ul>\n"
+
+        # Convert numbered points (1. Text:)
+        # elif re.match(r"\d+\.\s.*:", line):  # Match "1. Text:"
+        #     formatted_text += f"<ol><li>{line[3:].strip()}</li></ol>\n"
+
+        # Normal paragraphs
+        else:
+            formatted_text += f"<p>{line}</p>\n"
+
+    return formatted_text
 
 # Route for the chatbot
 @app.route('/chat', methods=['POST'])

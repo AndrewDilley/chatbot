@@ -35,38 +35,39 @@ body {
 
 .user-message {
     text-align: right;
-    color: blue;
+    color: #1E90FF; /* Dodger blue for better contrast */;
 }
 
 
 .ai-message {
     text-align: left;
-    color: green;
-    font-weight: bold;
+    color:  #228B22; /* Forest green, more distinguishable */;
+    font-weight: normal
     margin-bottom: 10px;
 }
 
 
 .error-message {
     text-align: center;
-    color: red;
+    color:  #FF4500; /* Orange red, distinct from green */
+    ;
 }
 
 .reference {
     text-align: left;
-    color: #555; /* Dark gray for reference text */
+    color: #333; /* Dark gray for reference text */
     font-style: italic; /* Italicized for distinction */
     margin-top: 5px;
     font-size: 0.9em; /* Slightly smaller font */
 }
 
 .reference .reference-label {
-    color: blue;
-    font-weight: bold;
+    color: #1E90FF;
+    font-weight: normal
 }
 
 .reference .reference-text {
-    color: green;
+    color: #228B22;
 }
 
 
