@@ -42,7 +42,7 @@ body {
 .ai-message {
     text-align: left;
     color:  #228B22; /* Forest green, more distinguishable */;
-    font-weight: normal
+    font-weight: normal;
     margin-bottom: 10px;
 }
 
@@ -53,22 +53,26 @@ body {
     ;
 }
 
-.reference {
-    text-align: left;
-    color: #333; /* Dark gray for reference text */
-    font-style: italic; /* Italicized for distinction */
-    margin-top: 5px;
-    font-size: 0.9em; /* Slightly smaller font */
+
+.reference-label {
+    color: #333; /* Dark gray for label */
+    font-weight: normal;
 }
 
-.reference .reference-label {
-    color: #1E90FF;
-    font-weight: normal
+.reference-text {
+    color: #333; /* Forest green for data */
 }
 
-.reference .reference-text {
-    color: #228B22;
+/* Ensure Content enquiries label and text are styled consistently with reference */
+.content-enquiries-label {
+    color: #333; /* Match reference label color */
+    font-weight: normal;
 }
+
+.content-enquiries-text {
+    color: #333; /* Match reference text color */
+}
+
 
 
 #chat-form {

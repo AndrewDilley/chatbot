@@ -69,71 +69,77 @@ def search_relevant_text(query, similarity_threshold=0.5):
 
     # If the best match is below the similarity threshold, return "N/A"
     if distances[0][0] > similarity_threshold:
-        return None, "N/A"
+        return None, "N/A", None
 
     matched_text, file_name = text_map[indices[0][0]]
-    return matched_text, file_name
+
+    # Extract "Content enquiries" from the document's metadata
+    content_enquiries = extract_content_enquiries(file_name)
+
+    return matched_text, file_name, content_enquiries
 
 
-# Generate chatbot response based on relevant text
-def generate_response(user_input):
+
+import os
+from docx import Document
+
+import os
+from docx import Document
+
+import os
+from docx import Document
+
+import os
+from docx import Document
+
+def extract_content_enquiries(file_name):
+    """
+    Extract 'Content enquiries' metadata from the document, including adjacent table cells.
+    """
     try:
+        # Construct the document path
+        document_path = os.path.join(DOCUMENTS_PATH, file_name)
+        document_path = os.path.normpath(document_path)  # Normalize the path for consistency
+        print(f"Debug: document_path = {document_path}")
 
-        generic_responses = {"hi", "hello", "hey", "greetings"}
-        if user_input.lower() in generic_responses:
-            return "Hello! How can I assist you today?"
+        # Check if the file is a .docx
+        if not file_name.lower().endswith('.docx'):
+            #print(f"Error: Unsupported file format for {file_name}. Only .docx files are supported.")
+            return None
 
+        # Verify the file exists
+        if not os.path.exists(document_path):
+            #print(f"Error: File not found at path: {document_path}")
+            return None
 
-        # Detect polite or non-document-related queries
-        polite_responses = {"thanks", "thank you", "bye", "goodbye"}
-        if user_input.lower().strip("!.") in polite_responses:
-            return "You're welcome! Let me know if you need anything else!"
+        # Load the document
+        doc = Document(document_path)
+        #print(f"Debug: Successfully loaded document.")
 
-        relevant_text, file_name = search_relevant_text(user_input)
-        
-        print(f"DEBUG: Matched file_name: {file_name}")
+        # Search paragraphs first
+        for paragraph in doc.paragraphs:
+            if "Content enquiries" in paragraph.text:
+                #print(f"Debug: Found 'Content enquiries' in paragraph: '{paragraph.text}'")
+                return paragraph.text.partition("Content enquiries")[-1].strip()
 
-        # If no relevant document text is found
-        if file_name == "N/A":
-            # Handle general queries directly
-            prompt = f"You are a helpful assistant. Please answer this question directly:\n\nQuestion: {user_input}"
-            completion = client.chat.completions.create(
-                model="gpt-4o-mini",
-                messages=[
-                    {"role": "system", "content": "You are a helpful assistant."},
-                    {"role": "user", "content": prompt}
-                ]
-            )
-            return completion.choices[0].message.content  # No reference for general queries
-
-        # Generate a response for document-related queries
-        prompt = f"Use the following document text to answer the question:\n\n{relevant_text}\n\nQuestion: {user_input}"
-        completion = client.chat.completions.create(
-            model="gpt-4o-mini",
-            messages=[
-                {"role": "system", "content": "You are a helpful assistant."},
-                {"role": "user", "content": prompt}
-            ]
-        )
-        answer = completion.choices[0].message.content
-
-        # Format response into readable sections
-        formatted_answer = format_response(answer)
-
-        # Add document reference only if relevant
-        sharepoint_link = SHAREPOINT_LINKS.get(file_name, "#")
-        if file_name and file_name != "N/A":
-            formatted_answer = (
-                f"{answer}<br><br>"
-                f"<span style='color:purple; font-weight:normal;'>Reference:</span> "
-                f"<a href='{sharepoint_link}' target='_blank'>{file_name}</a>"
-            )
-            return formatted_answer
-
-        return answer
+        # If not found in paragraphs, search tables
+        for table in doc.tables:
+            for row in table.rows:
+                for i, cell in enumerate(row.cells):
+                    if "Content enquiries" in cell.text:
+                        #print(f"Debug: Found 'Content enquiries' in table cell: '{cell.text}'")
+                        # Ensure there is a next cell in the same row
+                        if i + 1 < len(row.cells):
+                            adjacent_text = row.cells[i + 1].text.strip()
+                            #print(f"Debug: Adjacent cell text: '{adjacent_text}'")
+                            return adjacent_text
+                        else:
+                            #print("Debug: No adjacent cell found.")
+                            return None
 
     except Exception as e:
-        return f"Error: {str(e)}"
+        print(f"Error extracting content enquiries: {e}")
+        return None
 
 
 def generate_response(user_input):
@@ -148,7 +154,7 @@ def generate_response(user_input):
             return "You're welcome! Let me know if you need anything else!"
 
         # Get relevant text and file reference
-        relevant_text, file_name = search_relevant_text(user_input)
+        relevant_text, file_name, content_enquiries = search_relevant_text(user_input)
 
         if file_name == "N/A":
             prompt = f"You are a helpful assistant. Please answer this question directly:\n\nQuestion: {user_input}"
@@ -164,19 +170,25 @@ def generate_response(user_input):
         )
         answer = completion.choices[0].message.content
 
-        # raw_answer = answer if answer else "No answer found"
-        # print(f"DEBUG: Raw Answer: {raw_answer}")
 
         # Format response into readable sections
         formatted_answer = format_response(answer)
 
+        sharepoint_link = SHAREPOINT_LINKS.get(file_name, "#")
+
         # Add document reference if applicable
+        # Add document reference only if relevant
         if file_name != "N/A":
-            sharepoint_link = SHAREPOINT_LINKS.get(file_name, "#")
-            formatted_answer += (
-                f"<br><br><span style='color:purple; font-weight:normal;'>Reference:</span> "
-                f"<a href='{sharepoint_link}' target='_blank'>{file_name}</a>"
+            formatted_answer = (
+                f"{formatted_answer}<br>"
+                f"<span class='reference-label'>Reference:</span> "
+                f"<a href='{sharepoint_link}' target='_blank' class='reference-text'>{file_name}</a>"
             )
+            if content_enquiries:
+                formatted_answer += (
+                    f"<br><span class='content-enquiries-label'>Content enquiries:</span> "
+                    f"<span class='content-enquiries-text'>{content_enquiries}</span>"
+                )
 
         return formatted_answer
 
@@ -208,16 +220,17 @@ def format_response(raw_text):
         line = re.sub(r"\*\*", "", line)  # Remove all ** from the text
 
         # Convert headings (###)
-        if line.startswith("### "):
+        if line.startswith("#### "):
+            formatted_text += f"<h4>{line[5:].strip()}</h4>\n"
+
+        # Convert "### Text" to <h3>
+        elif line.startswith("### "):
             formatted_text += f"<h3>{line[4:].strip()}</h3>\n"
 
         # Convert bullet points (- ...)
         elif line.startswith("- "):
             formatted_text += f"<ul><li>{line[2:].strip()}</li></ul>\n"
 
-        # Convert numbered points (1. Text:)
-        # elif re.match(r"\d+\.\s.*:", line):  # Match "1. Text:"
-        #     formatted_text += f"<ol><li>{line[3:].strip()}</li></ol>\n"
 
         # Normal paragraphs
         else:
