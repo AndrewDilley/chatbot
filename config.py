@@ -1,12 +1,14 @@
 import os
 
 # Determine DOCUMENTS_PATH based on the environment
+
 if os.getenv("DOCKER_ENV") == "true":
     DOCUMENTS_PATH = "/app/documents"
     PREPROCESSED_PATH = "/app/preprocessed_data"
 else:
     DOCUMENTS_PATH = "C:/Users/andrew.dilley/development/chatbot12/documents"
     PREPROCESSED_PATH = "C:/Users/andrew.dilley/development/chatbot12/preprocessed_data"
+
 
 
 SHAREPOINT_LINKS = {

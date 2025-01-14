@@ -1,0 +1,22 @@
+# Dockerfile for preprocess_documents
+FROM python:3.9-slim
+
+# Set the working directory
+WORKDIR /app
+
+ENV DOCKER_ENV=true
+
+ENV OPENAI_API_KEY=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
+
+# Copy the required files
+COPY preprocess_documents.py config.py requirements.txt /app/
+COPY documents /app/documents/
+
+# Install dependencies
+RUN pip install --upgrade pip
+RUN pip install --no-cache-dir -r requirements.txt
+RUN pip install PyPDF2
+
+
+# Run the script
+CMD ["python", "preprocess_documents.py", "--output-dir", "/preprocessed_data", "--documents-dir", "/documents"]
