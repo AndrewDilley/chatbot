@@ -4,8 +4,7 @@ FROM python:3.9-slim
 # Set the working directory
 WORKDIR /app
 
-ENV OPENAI_API_KEY=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
-
+# Reference an environment variable passed during runtime
 
 # Copy necessary files into the container
 COPY requirements.txt /app/
@@ -27,7 +26,7 @@ COPY preprocessed_data/faiss_index.bin /app/preprocessed_data/
 COPY preprocessed_data/text_map.json /app/preprocessed_data/
 
 # Expose the port the app runs on
-EXPOSE 80
+EXPOSE 5000
 
 # Set environment variables
 ENV DOCKER_ENV=true

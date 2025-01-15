@@ -9,6 +9,7 @@ import os
 import json
 import faiss
 
+
 app = Flask(__name__)
 
 # Load environment variables
@@ -62,35 +63,27 @@ def generate_embeddings(text):
     return np.mean(embeddings, axis=0)  # Average embedding for simplicity
 
 
-def search_relevant_text(query, similarity_threshold=0.5):
+def search_relevant_text(query, similarity_threshold=0.2, min_length=5):
+
+   # Handle short queries
+    if len(query.split()) < min_length:
+        return None, "N/A", None
+
 
     query_embedding = np.array([generate_embeddings(query)]).astype('float32')
     distances, indices = index.search(query_embedding, k=1)
 
+
     # If the best match is below the similarity threshold, return "N/A"
-    if distances[0][0] > similarity_threshold:
-        return None, "N/A", None
+    if distances[0][0] < similarity_threshold:
+       return None, "N/A", None
 
     matched_text, file_name = text_map[indices[0][0]]
-
+    
     # Extract "Content enquiries" from the document's metadata
     content_enquiries = extract_content_enquiries(file_name)
 
     return matched_text, file_name, content_enquiries
-
-
-
-import os
-from docx import Document
-
-import os
-from docx import Document
-
-import os
-from docx import Document
-
-import os
-from docx import Document
 
 def extract_content_enquiries(file_name):
     """
@@ -100,7 +93,6 @@ def extract_content_enquiries(file_name):
         # Construct the document path
         document_path = os.path.join(DOCUMENTS_PATH, file_name)
         document_path = os.path.normpath(document_path)  # Normalize the path for consistency
-        print(f"Debug: document_path = {document_path}")
 
         # Check if the file is a .docx
         if not file_name.lower().endswith('.docx'):
@@ -109,17 +101,14 @@ def extract_content_enquiries(file_name):
 
         # Verify the file exists
         if not os.path.exists(document_path):
-            #print(f"Error: File not found at path: {document_path}")
             return None
 
         # Load the document
         doc = Document(document_path)
-        #print(f"Debug: Successfully loaded document.")
 
         # Search paragraphs first
         for paragraph in doc.paragraphs:
             if "Content enquiries" in paragraph.text:
-                #print(f"Debug: Found 'Content enquiries' in paragraph: '{paragraph.text}'")
                 return paragraph.text.partition("Content enquiries")[-1].strip()
 
         # If not found in paragraphs, search tables
@@ -127,14 +116,11 @@ def extract_content_enquiries(file_name):
             for row in table.rows:
                 for i, cell in enumerate(row.cells):
                     if "Content enquiries" in cell.text:
-                        #print(f"Debug: Found 'Content enquiries' in table cell: '{cell.text}'")
                         # Ensure there is a next cell in the same row
                         if i + 1 < len(row.cells):
                             adjacent_text = row.cells[i + 1].text.strip()
-                            #print(f"Debug: Adjacent cell text: '{adjacent_text}'")
                             return adjacent_text
                         else:
-                            #print("Debug: No adjacent cell found.")
                             return None
 
     except Exception as e:
@@ -189,6 +175,11 @@ def generate_response(user_input):
                     f"<br><span class='content-enquiries-label'>Content enquiries:</span> "
                     f"<span class='content-enquiries-text'>{content_enquiries}</span>"
                 )
+
+        # Reset variables to avoid carry-over
+        relevant_text = None
+        file_name = None
+        content_enquiries = None
 
         return formatted_answer
 
@@ -253,6 +244,6 @@ def home():
 
 if __name__ == '__main__':
     if os.getenv("DOCKER_ENV") == "true":
-        app.run(host='0.0.0.0', port=80, debug=False)
+        app.run(host='0.0.0.0', port=5000, debug=False)
     else:
         app.run(host='127.0.0.1', port=5000, debug=True)

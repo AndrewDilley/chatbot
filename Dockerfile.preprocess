@@ -6,7 +6,6 @@ WORKDIR /app
 
 ENV DOCKER_ENV=true
 
-ENV OPENAI_API_KEY=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
 
 # Copy the required files
 COPY preprocess_documents.py config.py requirements.txt /app/

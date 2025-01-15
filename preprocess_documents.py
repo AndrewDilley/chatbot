@@ -8,18 +8,6 @@ from openai import OpenAI
 from dotenv import load_dotenv
 
 
-# import argparse
-
-# # Parse command-line arguments
-# parser = argparse.ArgumentParser(description="Preprocess documents to generate JSON and FAISS files.")
-# parser.add_argument("--output-dir", type=str, required=True, help="Directory to save preprocessed files.")
-# parser.add_argument("--documents-dir", type=str, required=True, help="Directory containing documents.")
-# args = parser.parse_args()
-
-# # Use args.output_dir and args.documents_dir in your script logic
-# output_dir = args.output_dir
-# documents_dir = args.documents_dir
-
 load_dotenv()
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
@@ -64,6 +52,7 @@ def generate_embeddings(text):
     embeddings = []
     text_chunks = split_text_into_chunks(text)
     for chunk in text_chunks:
+
         response = client.embeddings.create(
             input=chunk,
             model="text-embedding-ada-002"
